@@ -1,0 +1,34 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}
+{% if object %}ブログ編集{% else %}新規ブログ作成{% endif %} - Blog App
+{% endblock %}
+
+{% block content %}
+<h1>{% if object %}ブログ編集{% else %}新規ブログ作成{% endif %}</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="{{ form.title.id_for_label }}" class="form-label">タイトル</label>
+        {{ form.title }}
+        {% if form.title.errors %}
+            <div class="text-danger">{{ form.title.errors }}</div>
+        {% endif %}
+    </div>
+    
+    <div class="mb-3">
+        <label for="{{ form.content.id_for_label }}" class="form-label">内容</label>
+        {{ form.content }}
+        {% if form.content.errors %}
+            <div class="text-danger">{{ form.content.errors }}</div>
+        {% endif %}
+    </div>
+    
+    <button type="submit" class="btn btn-primary">
+        {% if object %}更新{% else %}作成{% endif %}
+    </button>
+    <a href="{% if object %}{% url 'blog:blog_detail' object.pk %}{% else %}{% url 'blog:blog_list' %}{% endif %}" 
+       class="btn btn-secondary">キャンセル</a>
+</form>
+{% endblock %}
