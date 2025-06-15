@@ -15,11 +15,15 @@ class Command(BaseCommand):
         fake = Faker('ja_JP')
         
         blogs_count = options['blogs']
+        
+        blog_list = []
         for _ in range(blogs_count):
-            Blog.objects.create(
+            blog_list.append(Blog(
                 title=fake.sentence(nb_words=6),
                 content=fake.text(max_nb_chars=1000)
-            )
+            ))
+        
+        Blog.objects.bulk_create(blog_list)
         
         comments_count = options['comments']
         blogs = list(Blog.objects.all())
@@ -27,15 +31,18 @@ class Command(BaseCommand):
         if not blogs:
             self.stdout.write(self.style.ERROR('No blogs found. Create blogs first.'))
             return
-            
+        
+        comment_list = []
         for _ in range(comments_count):
-            Comment.objects.create(
+            comment_list.append(Comment(
                 content=fake.text(max_nb_chars=300),
                 blog=random.choice(blogs)
-            )
+            ))
+        
+        Comment.objects.bulk_create(comment_list)
         
         self.stdout.write(
             self.style.SUCCESS(
-                f'Successfully created {blogs_count} blogs and {comments_count} comments'
+                f'Successfully created {blogs_count} blogs and {comments_count} comments using bulk_create()'
             )
         )
