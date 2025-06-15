@@ -3,12 +3,15 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.prefetch import GenericPrefetch
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.views.decorators.cache import cache_page
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
+from django.utils.decorators import method_decorator
 from .models import Blog, Comment, Favorite
 from .forms import BlogForm, CommentForm
 
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class BlogListView(ListView):
     model = Blog
     template_name = 'blog/blog_list.html'
@@ -47,6 +50,7 @@ class BlogDeleteView(DeleteView):
     success_url = reverse_lazy('blog:blog_list')
 
 
+@cache_page(60 * 15)
 def blog_detail(request, pk):
     # GenericPrefetchを使用してお気に入りデータを事前取得
     blog = get_object_or_404(
@@ -128,6 +132,7 @@ class CommentDeleteView(DeleteView):
 
 
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class BlogListViewUnoptimized(ListView):
     """Blog list view without GenericPrefetch optimization"""
     model = Blog
@@ -151,6 +156,7 @@ class BlogListViewUnoptimized(ListView):
         return context
 
 
+@cache_page(60 * 15)
 def blog_detail_unoptimized(request, pk):
     """Blog detail view without GenericPrefetch optimization"""
     blog = get_object_or_404(Blog, pk=pk)
