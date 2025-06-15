@@ -12,4 +12,9 @@ urlpatterns = [
     path('comment/<int:pk>/edit/', views.CommentUpdateView.as_view(), name='comment_edit'),
     path('comment/<int:pk>/delete/', views.CommentDeleteView.as_view(), name='comment_delete'),
     path('toggle-favorite/', views.toggle_favorite, name='toggle_favorite'),
+    
+    path('unoptimized/', views.BlogListViewUnoptimized.as_view(), name='blog_list_unoptimized'),
+    path('unoptimized/<int:pk>/', views.blog_detail_unoptimized, name='blog_detail_unoptimized'),
+    
+    path('comparison/', views.comparison_dashboard, name='comparison_dashboard'),
 ]

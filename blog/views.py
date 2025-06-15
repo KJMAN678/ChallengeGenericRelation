@@ -129,3 +129,74 @@ class CommentDeleteView(DeleteView):
     
     def get_success_url(self):
         return reverse('blog:blog_detail', kwargs={'pk': self.object.blog.pk})
+
+
+
+class BlogListViewUnoptimized(ListView):
+    """Blog list view without GenericPrefetch optimization"""
+    model = Blog
+    template_name = 'blog/blog_list_unoptimized.html'
+    context_object_name = 'blogs'
+    paginate_by = 10
+    
+    def get_queryset(self):
+        return Blog.objects.all()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        blog_favorites = {}
+        for blog in context['blogs']:
+            blog_favorites[blog.pk] = Favorite.objects.filter(
+                content_type=ContentType.objects.get_for_model(Blog),
+                object_id=blog.pk
+            ).count()
+        context['blog_favorites'] = blog_favorites
+        context['optimization_type'] = 'unoptimized'
+        return context
+
+
+def blog_detail_unoptimized(request, pk):
+    """Blog detail view without GenericPrefetch optimization"""
+    blog = get_object_or_404(Blog, pk=pk)
+    
+    blog_ct = ContentType.objects.get_for_model(Blog)
+    is_blog_favorited = Favorite.objects.filter(
+        content_type=blog_ct,
+        object_id=blog.pk
+    ).exists()
+    
+    comments = blog.comments.all()
+    
+    comment_ct = ContentType.objects.get_for_model(Comment)
+    comment_favorites = {}
+    for comment in comments:
+        comment_favorites[comment.pk] = Favorite.objects.filter(
+            content_type=comment_ct,
+            object_id=comment.pk
+        ).exists()
+    
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.blog = blog
+            comment.save()
+            return redirect('blog:blog_detail_unoptimized', pk=blog.pk)
+    else:
+        form = CommentForm()
+    
+    return render(request, 'blog/blog_detail_unoptimized.html', {
+        'blog': blog,
+        'comments': comments,
+        'is_blog_favorited': is_blog_favorited,
+        'comment_favorites': comment_favorites,
+        'form': form,
+        'blog_content_type_id': blog_ct.id,
+        'comment_content_type_id': comment_ct.id,
+        'optimization_type': 'unoptimized',
+    })
+
+
+def comparison_dashboard(request):
+    """Dashboard to compare optimized vs unoptimized query performance"""
+    return render(request, 'blog/comparison_dashboard.html')
