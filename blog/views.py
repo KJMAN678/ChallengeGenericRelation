@@ -48,6 +48,7 @@ class BlogDeleteView(DeleteView):
 
 
 def blog_detail(request, pk):
+    # GenericPrefetchを使用してお気に入りデータを事前取得
     blog = get_object_or_404(
         Blog.objects.prefetch_related(
             GenericPrefetch(
@@ -60,18 +61,13 @@ def blog_detail(request, pk):
     )
     
     blog_ct = ContentType.objects.get_for_model(Blog)
-    is_blog_favorited = Favorite.objects.filter(
-        content_type=blog_ct,
-        object_id=blog.pk
-    ).exists()
-    
     comment_ct = ContentType.objects.get_for_model(Comment)
+    
+    is_blog_favorited = len(blog.favorites.all()) > 0
+    
     comment_favorites = {}
     for comment in blog.comments.all():
-        comment_favorites[comment.pk] = Favorite.objects.filter(
-            content_type=comment_ct,
-            object_id=comment.pk
-        ).exists()
+        comment_favorites[comment.pk] = len(comment.favorites.all()) > 0
     
     if request.method == 'POST':
         form = CommentForm(request.POST)
