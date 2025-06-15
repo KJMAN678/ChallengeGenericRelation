@@ -1,0 +1,210 @@
+{% extends 'blog/base.html' %}
+{% load blog_extras %}
+
+{% block title %}{{ blog.title }} (最適化なし){% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-blog"></i> {{ blog.title }}
+                        <span class="badge bg-warning text-dark ms-2">最適化なし</span>
+                    </h1>
+                    <div class="btn-group">
+                        <a href="{% url 'blog:comparison_dashboard' %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-chart-bar"></i> 比較
+                        </a>
+                        <a href="{% url 'blog:blog_edit' blog.pk %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-edit"></i> 編集
+                        </a>
+                        <a href="{% url 'blog:blog_delete' blog.pk %}" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-trash"></i> 削除
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>注意:</strong> このページは最適化されていません。Django Debug Toolbarでクエリ実行回数を確認してください。
+                    </div>
+                    
+                    <div class="blog-content mb-4">
+                        {{ blog.content|linebreaks }}
+                    </div>
+                    
+                    <div class="blog-meta d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i> 作成日: {{ blog.created_at|date:"Y-m-d H:i" }}
+                            {% if blog.updated_at != blog.created_at %}
+                                <br><i class="fas fa-edit"></i> 更新日: {{ blog.updated_at|date:"Y-m-d H:i" }}
+                            {% endif %}
+                        </small>
+                        <div>
+                            <button class="btn btn-sm favorite-btn {% if is_blog_favorited %}btn-danger{% else %}btn-outline-danger{% endif %}"
+                                    data-content-type-id="{{ blog_content_type_id }}"
+                                    data-object-id="{{ blog.pk }}">
+                                <i class="fas fa-heart"></i>
+                                {% if is_blog_favorited %}お気に入り解除{% else %}お気に入り追加{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="fas fa-comments"></i> コメント ({{ comments.count }})
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if comments %}
+                        {% for comment in comments %}
+                            <div class="comment mb-3 p-3 border rounded">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="comment-content flex-grow-1">
+                                        {{ comment.content|linebreaks }}
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar"></i> {{ comment.created_at|date:"Y-m-d H:i" }}
+                                        </small>
+                                    </div>
+                                    <div class="comment-actions ms-3">
+                                        <button class="btn btn-sm favorite-btn {% if comment_favorites|lookup:comment.pk %}btn-danger{% else %}btn-outline-danger{% endif %}"
+                                                data-content-type-id="{{ comment_content_type_id }}"
+                                                data-object-id="{{ comment.pk }}">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                        <a href="{% url 'blog:comment_edit' comment.pk %}" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'blog:comment_delete' comment.pk %}" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">
+                            <i class="fas fa-comment-slash fa-2x mb-2"></i><br>
+                            まだコメントがありません。最初のコメントを投稿してみましょう！
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Add Comment Form -->
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="fas fa-plus"></i> コメントを追加
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ form.content.label_tag }}
+                            {{ form.content }}
+                            {% if form.content.errors %}
+                                <div class="text-danger">
+                                    {{ form.content.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-paper-plane"></i> コメント投稿
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="fas fa-info-circle"></i> パフォーマンス情報
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>最適化状態:</strong> <span class="badge bg-danger">最適化なし</span></p>
+                    <p><strong>予想されるクエリ問題:</strong></p>
+                    <ul class="small">
+                        <li>N+1クエリ問題が発生</li>
+                        <li>各コメントのお気に入り状態を個別に取得</li>
+                        <li>GenericPrefetchを使用していない</li>
+                        <li>GenericRelationを活用していない</li>
+                    </ul>
+                    <hr>
+                    <p><strong>比較:</strong></p>
+                    <a href="{% url 'blog:blog_detail' blog.pk %}" class="btn btn-success btn-sm w-100 mb-2">
+                        <i class="fas fa-rocket"></i> 最適化版を見る
+                    </a>
+                    <a href="{% url 'blog:comparison_dashboard' %}" class="btn btn-info btn-sm w-100">
+                        <i class="fas fa-chart-bar"></i> 比較ダッシュボード
+                    </a>
+                </div>
+            </div>
+
+            <div class="card mt-3 shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="h5 mb-0">
+                        <i class="fas fa-tools"></i> Debug Toolbar
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="small">右側のDjango Debug Toolbarを確認して、SQLクエリの実行回数をチェックしてください。</p>
+                    <p class="small text-muted">最適化版と比較すると、クエリ実行回数が大幅に多いことが確認できます。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const favoriteButtons = document.querySelectorAll('.favorite-btn');
+    
+    favoriteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const contentTypeId = this.dataset.contentTypeId;
+            const objectId = this.dataset.objectId;
+            
+            fetch('{% url "blog:toggle_favorite" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: `content_type_id=${contentTypeId}&object_id=${objectId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.favorited) {
+                    this.classList.remove('btn-outline-danger');
+                    this.classList.add('btn-danger');
+                    if (this.innerHTML.includes('お気に入り追加')) {
+                        this.innerHTML = '<i class="fas fa-heart"></i> お気に入り解除';
+                    }
+                } else {
+                    this.classList.remove('btn-danger');
+                    this.classList.add('btn-outline-danger');
+                    if (this.innerHTML.includes('お気に入り解除')) {
+                        this.innerHTML = '<i class="fas fa-heart"></i> お気に入り追加';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('エラーが発生しました。');
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}ブログ削除確認 - Blog App{% endblock %}
+
+{% block content %}
+<h1>ブログ削除確認</h1>
+
+<div class="alert alert-warning">
+    <h4>本当に削除しますか？</h4>
+    <p>以下のブログを削除しようとしています：</p>
+    <strong>{{ object.title }}</strong>
+    <p class="mt-2">この操作は取り消せません。関連するコメントとお気に入りも全て削除されます。</p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">削除する</button>
+    <a href="{% url 'blog:blog_detail' object.pk %}" class="btn btn-secondary">キャンセル</a>
+</form>
+{% endblock %}

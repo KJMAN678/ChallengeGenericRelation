@@ -1,0 +1,193 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}パフォーマンス比較ダッシュボード{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="text-center mb-5">
+                <h1 class="text-primary">
+                    <i class="fas fa-chart-bar"></i> パフォーマンス比較ダッシュボード
+                </h1>
+                <p class="lead text-muted">GenericPrefetch/GenericRelation の最適化効果を確認</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm border-success">
+                        <div class="card-header bg-success text-white text-center">
+                            <h3 class="h4 mb-0">
+                                <i class="fas fa-rocket"></i> 最適化版
+                            </h3>
+                            <small>GenericPrefetch + GenericRelation 使用</small>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="text-success">✅ 最適化技術</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> GenericPrefetch でプリフェッチ</li>
+                                <li><i class="fas fa-check text-success"></i> GenericRelation で逆参照</li>
+                                <li><i class="fas fa-check text-success"></i> N+1問題を解決</li>
+                                <li><i class="fas fa-check text-success"></i> クエリ数を大幅削減</li>
+                            </ul>
+                            
+                            <h5 class="text-success mt-4">📊 予想パフォーマンス</h5>
+                            <ul class="list-unstyled">
+                                <li><strong>ブログ一覧:</strong> <span class="badge bg-success">3-5クエリ</span></li>
+                                <li><strong>ブログ詳細:</strong> <span class="badge bg-success">5-8クエリ</span></li>
+                                <li><strong>実行時間:</strong> <span class="badge bg-success">高速</span></li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'blog:blog_list' %}" class="btn btn-success">
+                                    <i class="fas fa-list"></i> 最適化版ブログ一覧
+                                </a>
+                                <a href="{% url 'blog:blog_list' %}" class="btn btn-outline-success">
+                                    <i class="fas fa-eye"></i> 詳細ページも確認
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm border-warning">
+                        <div class="card-header bg-warning text-dark text-center">
+                            <h3 class="h4 mb-0">
+                                <i class="fas fa-exclamation-triangle"></i> 非最適化版
+                            </h3>
+                            <small>GenericPrefetch/GenericRelation なし</small>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="text-warning">⚠️ 最適化なし</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-times text-danger"></i> GenericPrefetch 未使用</li>
+                                <li><i class="fas fa-times text-danger"></i> GenericRelation 未活用</li>
+                                <li><i class="fas fa-times text-danger"></i> N+1問題が発生</li>
+                                <li><i class="fas fa-times text-danger"></i> 個別クエリで取得</li>
+                            </ul>
+                            
+                            <h5 class="text-warning mt-4">📊 予想パフォーマンス</h5>
+                            <ul class="list-unstyled">
+                                <li><strong>ブログ一覧:</strong> <span class="badge bg-danger">20+クエリ</span></li>
+                                <li><strong>ブログ詳細:</strong> <span class="badge bg-danger">30+クエリ</span></li>
+                                <li><strong>実行時間:</strong> <span class="badge bg-danger">低速</span></li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'blog:blog_list_unoptimized' %}" class="btn btn-warning">
+                                    <i class="fas fa-list"></i> 非最適化版ブログ一覧
+                                </a>
+                                <a href="{% url 'blog:blog_list_unoptimized' %}" class="btn btn-outline-warning">
+                                    <i class="fas fa-eye"></i> 詳細ページも確認
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h3 class="h4 mb-0">
+                                <i class="fas fa-tools"></i> Django Debug Toolbar での確認方法
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-search"></i> 確認手順</h5>
+                                    <ol>
+                                        <li>上記のリンクから各ページにアクセス</li>
+                                        <li>右側のDjango Debug Toolbarを確認</li>
+                                        <li>「SQL」パネルをクリック</li>
+                                        <li>クエリ実行回数と実行時間を比較</li>
+                                    </ol>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-chart-line"></i> 注目ポイント</h5>
+                                    <ul>
+                                        <li><strong>クエリ数:</strong> 最適化版は大幅に少ない</li>
+                                        <li><strong>実行時間:</strong> 最適化版は高速</li>
+                                        <li><strong>重複クエリ:</strong> 非最適化版で多発</li>
+                                        <li><strong>N+1問題:</strong> 非最適化版で確認可能</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-dark text-white">
+                            <h3 class="h4 mb-0">
+                                <i class="fas fa-code"></i> 技術的な違い
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="text-success">✅ 最適化版のコード</h5>
+                                    <pre class="bg-light p-3 rounded"><code># GenericPrefetch使用
+Blog.objects.prefetch_related(
+    GenericPrefetch(
+        'favorites',
+        [Favorite.objects.all()]
+    ),
+    'comments__favorites'
+)
+
+# GenericRelation定義
+class Blog(models.Model):
+    favorites = GenericRelation('Favorite')</code></pre>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="text-warning">⚠️ 非最適化版のコード</h5>
+                                    <pre class="bg-light p-3 rounded"><code># 通常のクエリ（N+1問題）
+blog = Blog.objects.get(pk=pk)
+
+# 各コメントごとに個別クエリ
+for comment in blog.comments.all():
+    Favorite.objects.filter(
+        content_type=comment_ct,
+        object_id=comment.pk
+    ).exists()</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-12 text-center">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5><i class="fas fa-lightbulb text-warning"></i> 学習のポイント</h5>
+                            <p class="text-muted">
+                                両方のページを実際に訪問して、Django Debug Toolbarでクエリ実行回数の違いを確認してください。<br>
+                                GenericPrefetch と GenericRelation の最適化効果を実感できます。
+                            </p>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'blog:blog_list' %}" class="btn btn-success">
+                                    <i class="fas fa-rocket"></i> 最適化版を試す
+                                </a>
+                                <a href="{% url 'blog:blog_list_unoptimized' %}" class="btn btn-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> 非最適化版を試す
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

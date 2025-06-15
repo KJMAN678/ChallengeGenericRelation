@@ -1,0 +1,21 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}コメント編集 - Blog App{% endblock %}
+
+{% block content %}
+<h1>コメント編集</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="{{ form.content.id_for_label }}" class="form-label">コメント内容</label>
+        {{ form.content }}
+        {% if form.content.errors %}
+            <div class="text-danger">{{ form.content.errors }}</div>
+        {% endif %}
+    </div>
+    
+    <button type="submit" class="btn btn-primary">更新</button>
+    <a href="{% url 'blog:blog_detail' object.blog.pk %}" class="btn btn-secondary">キャンセル</a>
+</form>
+{% endblock %}
